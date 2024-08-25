@@ -2,7 +2,7 @@ import os
 from PIL import Image
 
 # Função para ajustar a imagem
-def adjust_image(image_path, output_folder):
+def adjust_image(image_path, output_folder, logo_path=None):
     # Define a largura e altura desejadas
     target_width = 2560
     target_height = 1080
@@ -25,16 +25,30 @@ def adjust_image(image_path, output_folder):
     # Cola a imagem original à direita
     new_image.paste(image, (target_width - original_width, 0))
     
+    # Se o caminho da logo for fornecido, adiciona a logo
+    if logo_path:
+        # Carrega a logo
+        logo = Image.open(logo_path).convert("RGBA")
+        
+        # Redimensiona a logo
+        logo = logo.resize((32, 32), Image.LANCZOS)
+        
+        # Cola a logo na nova imagem
+        new_image.paste(logo, (16, 16), logo)
+    
     # Salva a imagem ajustada na pasta de saída no formato JPG
     adjusted_image_path = os.path.join(output_folder, os.path.splitext(os.path.basename(image_path))[0] + ".jpg")
     new_image.save(adjusted_image_path, "JPEG")
     print(f"Imagem ajustada: {adjusted_image_path}")
 
 # Função principal
-def main(folder_path):
+def main(folder_path, add_logo=True):
     # Define a pasta de saída
     output_folder = os.path.join(folder_path, "adjusted_wallpapers")
     os.makedirs(output_folder, exist_ok=True)
+
+    # Define o caminho da logo se a opção de adicionar logo estiver ativada
+    logo_path = os.path.join(os.path.dirname(__file__), "logo.png") if add_logo else None
 
     # Obtém todas as imagens na pasta especificada
     images = [f for f in os.listdir(folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
@@ -45,9 +59,11 @@ def main(folder_path):
     # Ajusta cada imagem e salva na pasta de saída
     for image in images:
         image_path = os.path.join(folder_path, image)
-        adjust_image(image_path, output_folder)
+        adjust_image(image_path, output_folder, logo_path)
 
 if __name__ == "__main__":
     # Define a pasta de entrada
     folder_path = "W:\\wallpapers"
-    main(folder_path)
+    # Define se a logo deve ser adicionada ou não
+    add_logo = True  # Altere para False se não quiser adicionar a logo
+    main(folder_path, add_logo)
